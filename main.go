@@ -16,8 +16,8 @@ func main() {
         agents int
         nats_server string
     )
-    flag.IntVar(&max_step, "max_step", 200000, "for max step")
-    flag.IntVar(&agents, "agents", 20, "init agents number")
+    flag.IntVar(&max_step, "max_step", 2000, "for max step")
+    flag.IntVar(&agents, "agents", 30, "init agents number")
     flag.StringVar(&nats_server, "server", "nats", "NATS messaging server")
     flag.Parse()
     step := 1

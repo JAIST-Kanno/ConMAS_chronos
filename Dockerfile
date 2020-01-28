@@ -1,3 +1,3 @@
 FROM scratch
-COPY chronos /chronos
+COPY ConMAS_chronos /chronos
 CMD ["/chronos"]

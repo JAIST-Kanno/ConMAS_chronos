@@ -2,7 +2,6 @@ package main
 
 import (
     "flag"
-    "fmt"
     "github.com/nats-io/nats.go"
     "log"
     "os"
@@ -18,19 +17,20 @@ func main() {
     )
     flag.IntVar(&max_step, "max_step", 2000, "for max step")
     flag.IntVar(&agents, "agents", 30, "init agents number")
-    flag.StringVar(&nats_server, "server", "nats", "NATS messaging server")
+    flag.StringVar(&nats_server, "server", "nats:4222", "NATS messaging server")
     flag.Parse()
-    step := 1
+    step := 0
     readyAgents := 0
     t1 := time.Now()
     opt := []nats.Option{}
     opt = setupConnOptions(opt)
-    nc, err := nats.Connect("nats://" + nats_server + ":4222", opt...)
+    nc, err := nats.Connect("nats://" + nats_server, opt...)
     n, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
     if err != nil {
         panic(err)
     }
-    n.Subscribe("agents.init", func(msg *nats.Msg) {
+
+    n.Subscribe("agents.init", func(msg string) {
         readyAgents = readyAgents + 1
         println("readyAgents:", readyAgents)
         if readyAgents >= agents {
@@ -43,15 +43,15 @@ func main() {
     n.Subscribe("api.next", func(msg string) {
         if max_step > step {
             step = step + 1
-            fmt.Printf("simulation loop: %d\n", step)
+            //fmt.Printf("simulation loop: %d\n", step)
         } else {
             t2 := time.Now()
             n.Publish("api.exit", "All done! EXIT!")
             timeDiff := t2.Sub(t1)
             sps := float64(step) / timeDiff.Seconds()
-            print("Done ", step, "steps with", agents, "agents")
-            print("in", timeDiff.Seconds(), "seconds")
-            print("Steps per Seconds:", sps)
+            println("Done ", step, "steps with", agents, "agents")
+            println("in", timeDiff.Seconds(), "seconds")
+            println("Steps per Seconds:", sps)
             println("Simulation terminating...")
             os.Exit(0)
         }
@@ -63,7 +63,7 @@ func main() {
             n.Publish("api.move", "Move agents!")
         }
     })
-    n.Subscribe("agents.moved", func(msg *nats.Msg) {
+    nc.Subscribe("agents.moved", func(msg *nats.Msg) {
         readyAgents = readyAgents + 1
         if readyAgents >= agents {
             readyAgents = 0

@@ -11,6 +11,7 @@ build:
 
 containerize: ./ConMAS_chronos
 	docker build -t docker.pkg.github.com/jaist-kanno/conmas_chronos/chronos:1.0 .
+	docker build -t jaistkanno/chronos:1.0 .
 
 clean: ./ConMAS_chronos
 	rm ConMAS_chronos
